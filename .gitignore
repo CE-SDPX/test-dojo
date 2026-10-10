@@ -1,0 +1,21 @@
+# ไฟล์ตั้งค่าส่วนตัว
+.env
+
+# ข้อมูลและไฟล์ชั่วคราว
+app/data/
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ระบบปฏิบัติการและโปรแกรมแก้ไข
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,1814 @@
+openapi: 3.0.3
+info:
+  title: DojoMart API
+  version: 1.0.0
+  description: |
+    ข้อกำหนด API ของ DojoMart (ระบบร้านค้าออนไลน์สำหรับฝึกทดสอบซอฟต์แวร์)
+    เนื้อหาเดียวกับ docs/design/api.md ในรูปแบบที่นำเข้า Postman ได้
+    ข้อกำหนดเชิงพฤติกรรมอยู่ใน docs/requirements/PRD-*.md
+    จำนวนเงินเป็นสตริงทศนิยม 2 ตำแหน่ง เวลาเป็น ISO 8601 พร้อม +07:00
+servers:
+  - url: http://localhost:8001
+    description: ค่าเริ่มต้น (ปรับได้ด้วย API_PORT ในไฟล์ .env)
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Profile
+  - name: Catalog
+  - name: Reviews
+  - name: Wishlist
+  - name: Cart
+  - name: Orders
+  - name: Inventory
+  - name: Manage products
+  - name: Manage coupons
+  - name: Reports
+  - name: Admin
+  - name: Utility
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a customer account
+      description: REQ-AUTH-001, REQ-AUTH-002
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RegisteredUser' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in
+      description: REQ-AUTH-003 to REQ-AUTH-005, REQ-AUTH-006
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '423': { $ref: '#/components/responses/Locked' }
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Sign out (revokes the token used)
+      description: REQ-AUTH-007
+      responses:
+        '204': { description: No Content }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change own password
+      description: REQ-AUTH-008, REQ-AUTH-009
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '204': { description: No Content }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/me:
+    get:
+      tags: [Profile]
+      summary: Get own profile
+      description: REQ-PROF-001
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Profile]
+      summary: Update own profile (display_name, phone for customers)
+      description: REQ-PROF-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateMeRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/me/addresses:
+    get:
+      tags: [Profile]
+      summary: List own addresses (customer)
+      description: REQ-PROF-002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Address' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Profile]
+      summary: Create an address (customer, max 5)
+      description: REQ-PROF-002, REQ-PROF-003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddressInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/me/addresses/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    put:
+      tags: [Profile]
+      summary: Update an address
+      description: REQ-PROF-002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddressInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Profile]
+      summary: Delete an address
+      description: REQ-PROF-005
+      responses:
+        '204': { description: No Content }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/me/addresses/{id}/default:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Profile]
+      summary: Set an address as the default
+      description: REQ-PROF-004
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/products:
+    get:
+      tags: [Catalog]
+      summary: List active products (customer)
+      description: REQ-CAT-001 to REQ-CAT-005
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'ค้นหาในชื่อสินค้า (ไม่แยกตัวพิมพ์)' }
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/Category' } }
+        - { name: min_price, in: query, schema: { type: string, example: '100.00' } }
+        - { name: max_price, in: query, schema: { type: string, example: '200.00' } }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [name_asc, name_desc, price_asc, price_desc], default: name_asc }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/ProductListItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags: [Catalog]
+      summary: Get product detail (customer)
+      description: REQ-CAT-006
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/products/{id}/reviews:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags: [Reviews]
+      summary: List reviews of a product (newest first)
+      description: REQ-REV-004
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Reviews]
+      summary: Write a review (only after receiving the product)
+      description: REQ-REV-001 to REQ-REV-003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/wishlist:
+    get:
+      tags: [Wishlist]
+      summary: List wishlist (newest added first)
+      description: REQ-WISH-003
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/WishlistItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/wishlist/{product_id}:
+    parameters:
+      - $ref: '#/components/parameters/ProductIdPath'
+    put:
+      tags: [Wishlist]
+      summary: Add a product to the wishlist
+      description: REQ-WISH-001
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  product_id: { type: integer }
+                  added_at: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Wishlist]
+      summary: Remove a product from the wishlist
+      description: REQ-WISH-002
+      responses:
+        '204': { description: No Content }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/cart:
+    get:
+      tags: [Cart]
+      summary: Get the cart with pricing
+      description: REQ-CART-010
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/cart/items:
+    post:
+      tags: [Cart]
+      summary: Add a product to the cart (merges with an existing line)
+      description: REQ-CART-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddCartItemRequest' }
+      responses:
+        '200':
+          description: OK (returns the whole cart)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/cart/items/{item_id}:
+    parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema: { type: integer }
+    patch:
+      tags: [Cart]
+      summary: Set the quantity of a cart line
+      description: REQ-CART-002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateQuantityRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Cart]
+      summary: Remove a cart line
+      description: REQ-CART-003
+      responses:
+        '200':
+          description: OK (returns the whole cart)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/cart/coupon:
+    put:
+      tags: [Cart]
+      summary: Apply a coupon (replaces the current one)
+      description: REQ-COUP-002 to REQ-COUP-005
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApplyCouponRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Cart]
+      summary: Remove the coupon from the cart
+      description: REQ-COUP-004
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/orders:
+    post:
+      tags: [Orders]
+      summary: Place an order from the cart
+      description: REQ-ORD-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    get:
+      tags: [Orders]
+      summary: List own orders (newest first)
+      description: REQ-ORD-007
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/OrderListItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/orders/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags: [Orders]
+      summary: Get an order (customer own; staff and admin any)
+      description: REQ-ORD-007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/orders/{id}/pay:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Orders]
+      summary: Pay for an order (simulated)
+      description: REQ-ORD-003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PayRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/orders/{id}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Orders]
+      summary: Cancel an order
+      description: REQ-ORD-004, REQ-ORD-005
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/orders/{id}/return:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Orders]
+      summary: Return a delivered order (within 7 days)
+      description: REQ-ORD-006
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/manage/orders:
+    get:
+      tags: [Orders]
+      summary: Order queue (staff, admin)
+      description: REQ-ORD-008
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'เลขคำสั่งซื้อ (ตรงทั้งค่า) หรือส่วนหนึ่งของ username ลูกค้า' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/ManageOrderListItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/orders/{id}/status:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    patch:
+      tags: [Orders]
+      summary: Move an order to PACKED, SHIPPED or DELIVERED (staff, admin)
+      description: REQ-ORD-004, REQ-ORD-008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/manage/inventory:
+    get:
+      tags: [Inventory]
+      summary: Stock list (staff, admin)
+      description: REQ-INV-005
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/InventoryItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/inventory/adjustments:
+    post:
+      tags: [Inventory]
+      summary: Adjust stock (staff, admin)
+      description: REQ-INV-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdjustmentRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Movement' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/manage/inventory/movements:
+    get:
+      tags: [Inventory]
+      summary: Stock movement history (newest first)
+      description: REQ-INV-002
+      parameters:
+        - { name: product_id, in: query, schema: { type: integer } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Movement' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/inventory/low-stock:
+    get:
+      tags: [Inventory]
+      summary: Latest low-stock snapshot
+      description: REQ-INV-004
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LowStock' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/manage/products:
+    get:
+      tags: [Manage products]
+      summary: List all products including inactive (manager, admin)
+      description: REQ-CAT-009
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'ชื่อหรือ SKU' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/ManageProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Manage products]
+      summary: Create a product
+      description: REQ-CAT-009
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductCreateRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/manage/products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    put:
+      tags: [Manage products]
+      summary: Update name, description, category and price
+      description: REQ-CAT-009
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductUpdateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/manage/products/{id}/active:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    patch:
+      tags: [Manage products]
+      summary: Activate or deactivate a product
+      description: REQ-CAT-009
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActiveRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/manage/coupons:
+    get:
+      tags: [Manage coupons]
+      summary: List coupons (manager, admin)
+      description: REQ-COUP-008
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'ส่วนหนึ่งของรหัสคูปอง' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/ManageCoupon' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Manage coupons]
+      summary: Create a coupon
+      description: REQ-COUP-001, REQ-COUP-008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CouponCreateRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageCoupon' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/manage/coupons/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    put:
+      tags: [Manage coupons]
+      summary: Update a coupon (code and type cannot change)
+      description: REQ-COUP-008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CouponUpdateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageCoupon' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/manage/coupons/{id}/active:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    patch:
+      tags: [Manage coupons]
+      summary: Enable or disable a coupon
+      description: REQ-COUP-008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActiveRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageCoupon' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/manage/reports/sales:
+    get:
+      tags: [Reports]
+      summary: Sales summary for a date range
+      description: REQ-RPT-001
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SalesReport' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/sales.csv:
+    get:
+      tags: [Reports]
+      summary: Sales summary as CSV
+      description: REQ-RPT-005
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/top-products:
+    get:
+      tags: [Reports]
+      summary: Top-selling products
+      description: REQ-RPT-002
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 20, default: 5 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/TopProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/top-products.csv:
+    get:
+      tags: [Reports]
+      summary: Top-selling products as CSV
+      description: REQ-RPT-005
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 20, default: 5 } }
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/coupon-usage:
+    get:
+      tags: [Reports]
+      summary: Coupon usage
+      description: REQ-RPT-003
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/CouponUsageRow' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/hourly:
+    get:
+      tags: [Reports]
+      summary: Window reports created by the hourly-sales-report job
+      description: REQ-RPT-004
+      parameters:
+        - $ref: '#/components/parameters/FromDateTime'
+        - $ref: '#/components/parameters/ToDateTime'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/WindowReportRow' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/manage/reports/hourly.csv:
+    get:
+      tags: [Reports]
+      summary: Window reports as CSV
+      description: REQ-RPT-005
+      parameters:
+        - $ref: '#/components/parameters/FromDateTime'
+        - $ref: '#/components/parameters/ToDateTime'
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List and search users (admin)
+      description: REQ-ADM-001
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 }, description: 'username หรือ display_name' }
+        - { name: role, in: query, schema: { $ref: '#/components/schemas/Role' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/AdminUser' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/admin/users/{id}/lock:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Admin]
+      summary: Lock an account
+      description: REQ-ADM-002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/admin/users/{id}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Admin]
+      summary: Unlock an account (also clears the temporary lockout)
+      description: REQ-ADM-003
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/admin/users/{id}/reset-password:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Admin]
+      summary: Reset a password (returns a temporary password once)
+      description: REQ-ADM-004
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  temporary_password: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/admin/users/{id}/role:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    patch:
+      tags: [Admin]
+      summary: Change a role
+      description: REQ-ADM-005
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUser' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/admin/jobs:
+    get:
+      tags: [Admin]
+      summary: List scheduled jobs
+      description: REQ-SCH-001
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Job' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/admin/jobs/{name}/run:
+    parameters:
+      - $ref: '#/components/parameters/JobNamePath'
+    post:
+      tags: [Admin]
+      summary: Run a job now
+      description: REQ-SCH-005
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunJobRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobRun' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/admin/jobs/{name}/runs:
+    parameters:
+      - $ref: '#/components/parameters/JobNamePath'
+    get:
+      tags: [Admin]
+      summary: Run history of a job (newest first)
+      description: REQ-SCH-006
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMeta'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/JobRun' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/health:
+    get:
+      tags: [Utility]
+      summary: Health check (out of test scope)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/version:
+    get:
+      tags: [Utility]
+      summary: Build version and source hash (out of test scope)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version: { type: string, example: 1.0.0 }
+                  source_hash: { type: string }
+                  started_at: { type: string, format: date-time }
+  /api/reset:
+    post:
+      tags: [Utility]
+      summary: Reset all data to the seed data (out of test scope)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: reset }
+                  reset_at: { type: string, format: date-time }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: โทเคนที่ได้จาก POST /api/auth/login
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    ProductIdPath:
+      name: product_id
+      in: path
+      required: true
+      schema: { type: integer }
+    JobNamePath:
+      name: name
+      in: path
+      required: true
+      schema: { type: string, enum: [cancel-unpaid-orders, hourly-sales-report, low-stock-snapshot] }
+    FromDate:
+      name: from
+      in: query
+      required: true
+      schema: { type: string, format: date, example: '2026-10-04' }
+    ToDate:
+      name: to
+      in: query
+      required: true
+      schema: { type: string, format: date, example: '2026-10-10' }
+    FromDateTime:
+      name: from
+      in: query
+      required: true
+      schema: { type: string, example: '2026-10-10T14:00+07:00' }
+    ToDateTime:
+      name: to
+      in: query
+      required: true
+      schema: { type: string, example: '2026-10-10T18:00+07:00' }
+  responses:
+    BadRequest:
+      description: Bad request (VALIDATION_ERROR, INVALID_JSON, INVALID_CURRENT_PASSWORD)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Unauthorized (UNAUTHENTICATED, INVALID_CREDENTIALS)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden (FORBIDDEN, ACCOUNT_DISABLED, PASSWORD_CHANGE_REQUIRED, REVIEW_NOT_ALLOWED)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found (NOT_FOUND)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflict (see the error codes in docs/design/api.md)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Locked:
+      description: Account temporarily locked (ACCOUNT_LOCKED)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string, example: VALIDATION_ERROR }
+            message: { type: string }
+            reason: { type: string, description: 'เฉพาะ COUPON_INVALID' }
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  message: { type: string }
+    Money:
+      type: string
+      pattern: '^\d+\.\d{2}$'
+      example: '1234.50'
+    PageMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        page_size: { type: integer }
+        total_items: { type: integer }
+        total_pages: { type: integer }
+    Role:
+      type: string
+      enum: [customer, staff, manager, admin]
+    Category:
+      type: string
+      enum: [Drinkware, Apparel, Stationery, Electronics, Home]
+    OrderStatus:
+      type: string
+      enum: [PENDING_PAYMENT, PAID, PACKED, SHIPPED, DELIVERED, CANCELLED, RETURNED]
+    StockStatus:
+      type: string
+      enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK]
+    RegisterRequest:
+      type: object
+      required: [username, password, display_name, birthdate]
+      properties:
+        username: { type: string, example: newbuyer1 }
+        password: { type: string, example: Passw0rdA }
+        display_name: { type: string, example: New Buyer }
+        birthdate: { type: string, format: date, example: '1999-05-20' }
+    RegisteredUser:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        display_name: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        created_at: { type: string, format: date-time }
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, example: customer1 }
+        password: { type: string, example: Customer123 }
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+        token_type: { type: string, example: Bearer }
+        expires_in: { type: integer, example: 600 }
+        must_change_password: { type: boolean }
+        user:
+          type: object
+          properties:
+            id: { type: integer }
+            username: { type: string }
+            display_name: { type: string }
+            role: { $ref: '#/components/schemas/Role' }
+    ChangePasswordRequest:
+      type: object
+      required: [current_password, new_password]
+      properties:
+        current_password: { type: string }
+        new_password: { type: string }
+    Me:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        display_name: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        phone: { type: string, nullable: true }
+        birthdate: { type: string, format: date, nullable: true }
+        must_change_password: { type: boolean }
+        created_at: { type: string, format: date-time }
+    UpdateMeRequest:
+      type: object
+      properties:
+        display_name: { type: string }
+        phone: { type: string, nullable: true }
+    Address:
+      allOf:
+        - $ref: '#/components/schemas/AddressInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            is_default: { type: boolean }
+            created_at: { type: string, format: date-time }
+    AddressInput:
+      type: object
+      required: [label, recipient_name, phone, line1, province, postal_code]
+      properties:
+        label: { type: string }
+        recipient_name: { type: string }
+        phone: { type: string, example: '0812345678' }
+        line1: { type: string }
+        line2: { type: string, nullable: true }
+        province: { type: string }
+        postal_code: { type: string, example: '10110' }
+    ProductListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        category: { $ref: '#/components/schemas/Category' }
+        price: { $ref: '#/components/schemas/Money' }
+        stock_status: { $ref: '#/components/schemas/StockStatus' }
+        average_rating: { type: string, nullable: true, example: '4.5' }
+        review_count: { type: integer }
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProductListItem'
+        - type: object
+          properties:
+            description: { type: string, nullable: true }
+            stock: { type: integer }
+            in_wishlist: { type: boolean }
+    Review:
+      type: object
+      properties:
+        id: { type: integer }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, nullable: true }
+        display_name: { type: string }
+        created_at: { type: string, format: date-time }
+    ReviewInput:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, nullable: true, maxLength: 500 }
+    WishlistItem:
+      type: object
+      properties:
+        product_id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        price: { $ref: '#/components/schemas/Money' }
+        stock_status: { $ref: '#/components/schemas/StockStatus' }
+        added_at: { type: string, format: date-time }
+    Pricing:
+      type: object
+      properties:
+        subtotal: { $ref: '#/components/schemas/Money' }
+        volume_discount: { $ref: '#/components/schemas/Money' }
+        coupon_discount: { $ref: '#/components/schemas/Money' }
+        goods_total: { $ref: '#/components/schemas/Money' }
+        vat: { $ref: '#/components/schemas/Money' }
+        shipping: { $ref: '#/components/schemas/Money' }
+        grand_total: { $ref: '#/components/schemas/Money' }
+    CartItem:
+      type: object
+      properties:
+        id: { type: integer }
+        product_id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        unit_price: { $ref: '#/components/schemas/Money' }
+        quantity: { type: integer }
+        line_total: { $ref: '#/components/schemas/Money' }
+        stock_status: { $ref: '#/components/schemas/StockStatus' }
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CartItem' }
+        coupon:
+          type: object
+          nullable: true
+          properties:
+            code: { type: string }
+            valid: { type: boolean }
+            message: { type: string, nullable: true }
+        pricing: { $ref: '#/components/schemas/Pricing' }
+    AddCartItemRequest:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id: { type: integer }
+        quantity: { type: integer, minimum: 1, maximum: 10 }
+    UpdateQuantityRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer, minimum: 1, maximum: 10 }
+    ApplyCouponRequest:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, example: SAVE10 }
+    CreateOrderRequest:
+      type: object
+      required: [address_id]
+      properties:
+        address_id: { type: integer }
+    PayRequest:
+      type: object
+      required: [method]
+      properties:
+        method: { type: string, enum: [CARD, PROMPTPAY] }
+    StatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [PACKED, SHIPPED, DELIVERED] }
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        customer:
+          type: object
+          properties:
+            id: { type: integer }
+            username: { type: string }
+            display_name: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id: { type: integer }
+              sku: { type: string }
+              name: { type: string }
+              unit_price: { $ref: '#/components/schemas/Money' }
+              quantity: { type: integer }
+              line_total: { $ref: '#/components/schemas/Money' }
+        coupon_code: { type: string, nullable: true }
+        pricing: { $ref: '#/components/schemas/Pricing' }
+        address:
+          type: object
+          properties:
+            label: { type: string }
+            recipient_name: { type: string }
+            phone: { type: string }
+            line1: { type: string }
+            line2: { type: string, nullable: true }
+            province: { type: string }
+            postal_code: { type: string }
+        refund_amount: { $ref: '#/components/schemas/Money' }
+        created_at: { type: string, format: date-time }
+        paid_at: { type: string, format: date-time, nullable: true }
+        packed_at: { type: string, format: date-time, nullable: true }
+        shipped_at: { type: string, format: date-time, nullable: true }
+        delivered_at: { type: string, format: date-time, nullable: true }
+        cancelled_at: { type: string, format: date-time, nullable: true }
+        returned_at: { type: string, format: date-time, nullable: true }
+        return_deadline: { type: string, format: date-time, nullable: true }
+    OrderListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        grand_total: { $ref: '#/components/schemas/Money' }
+        item_count: { type: integer }
+        created_at: { type: string, format: date-time }
+    ManageOrderListItem:
+      allOf:
+        - $ref: '#/components/schemas/OrderListItem'
+        - type: object
+          properties:
+            customer:
+              type: object
+              properties:
+                id: { type: integer }
+                username: { type: string }
+                display_name: { type: string }
+    InventoryItem:
+      type: object
+      properties:
+        product_id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        stock: { type: integer }
+        active: { type: boolean }
+    AdjustmentRequest:
+      type: object
+      required: [product_id, delta, reason]
+      properties:
+        product_id: { type: integer }
+        delta: { type: integer, example: -3 }
+        reason: { type: string, enum: [RECEIVE, DAMAGE, CORRECTION] }
+    Movement:
+      type: object
+      properties:
+        id: { type: integer }
+        product_id: { type: integer }
+        product_name: { type: string }
+        delta: { type: integer }
+        stock_after: { type: integer }
+        reason: { type: string, enum: [RECEIVE, DAMAGE, CORRECTION, ORDER, CANCEL, RETURN] }
+        actor: { type: string }
+        created_at: { type: string, format: date-time }
+    LowStock:
+      type: object
+      properties:
+        taken_at: { type: string, format: date-time, nullable: true }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id: { type: integer }
+              sku: { type: string }
+              name: { type: string }
+              stock: { type: integer }
+    ManageProduct:
+      type: object
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { $ref: '#/components/schemas/Category' }
+        price: { $ref: '#/components/schemas/Money' }
+        stock: { type: integer }
+        active: { type: boolean }
+        created_at: { type: string, format: date-time }
+    ProductCreateRequest:
+      type: object
+      required: [sku, name, category, price]
+      properties:
+        sku: { type: string, example: DM-NEW1 }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { $ref: '#/components/schemas/Category' }
+        price: { $ref: '#/components/schemas/Money' }
+        stock: { type: integer, minimum: 0, default: 0 }
+    ProductUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { $ref: '#/components/schemas/Category' }
+        price: { $ref: '#/components/schemas/Money' }
+    ActiveRequest:
+      type: object
+      required: [active]
+      properties:
+        active: { type: boolean }
+    ManageCoupon:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        type: { type: string, enum: [PERCENT, FIXED] }
+        percent_off: { type: integer, nullable: true }
+        amount_off: { type: string, nullable: true }
+        max_discount: { type: string, nullable: true }
+        min_spend: { $ref: '#/components/schemas/Money' }
+        starts_at: { type: string, example: '2026-10-10T14:30+07:00' }
+        expires_at: { type: string, example: '2026-10-10T15:30+07:00' }
+        per_user_limit: { type: integer }
+        total_limit: { type: integer, nullable: true }
+        active: { type: boolean }
+        status: { type: string, enum: [DISABLED, SCHEDULED, ACTIVE, EXPIRED] }
+        usage_count: { type: integer }
+        created_at: { type: string, format: date-time }
+    CouponCreateRequest:
+      type: object
+      required: [code, type, starts_at, expires_at]
+      properties:
+        code: { type: string, example: WELCOME20 }
+        type: { type: string, enum: [PERCENT, FIXED] }
+        percent_off: { type: integer, minimum: 1, maximum: 100 }
+        amount_off: { type: string, example: '100.00' }
+        max_discount: { type: string, nullable: true }
+        min_spend: { type: string, default: '0.00' }
+        starts_at: { type: string, example: '2026-10-10T14:30+07:00' }
+        expires_at: { type: string, example: '2026-10-10T15:30+07:00' }
+        per_user_limit: { type: integer, default: 1 }
+        total_limit: { type: integer, nullable: true }
+        active: { type: boolean, default: true }
+    CouponUpdateRequest:
+      type: object
+      properties:
+        percent_off: { type: integer, minimum: 1, maximum: 100 }
+        amount_off: { type: string }
+        max_discount: { type: string, nullable: true }
+        min_spend: { type: string }
+        starts_at: { type: string }
+        expires_at: { type: string }
+        per_user_limit: { type: integer }
+        total_limit: { type: integer, nullable: true }
+    SalesReport:
+      type: object
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        order_count: { type: integer }
+        gross_sales: { $ref: '#/components/schemas/Money' }
+        vat_total: { $ref: '#/components/schemas/Money' }
+        shipping_total: { $ref: '#/components/schemas/Money' }
+        discount_total: { $ref: '#/components/schemas/Money' }
+        average_order_value: { $ref: '#/components/schemas/Money' }
+        daily:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              order_count: { type: integer }
+              gross_sales: { $ref: '#/components/schemas/Money' }
+              vat_total: { $ref: '#/components/schemas/Money' }
+              shipping_total: { $ref: '#/components/schemas/Money' }
+              discount_total: { $ref: '#/components/schemas/Money' }
+    TopProduct:
+      type: object
+      properties:
+        product_id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        quantity: { type: integer }
+        revenue: { $ref: '#/components/schemas/Money' }
+    CouponUsageRow:
+      type: object
+      properties:
+        code: { type: string }
+        order_count: { type: integer }
+        discount_total: { $ref: '#/components/schemas/Money' }
+    WindowReportRow:
+      type: object
+      properties:
+        window_start: { type: string, example: '2026-10-10T14:00+07:00' }
+        window_end: { type: string, example: '2026-10-10T15:00+07:00' }
+        order_count: { type: integer }
+        gross_sales: { $ref: '#/components/schemas/Money' }
+        vat_total: { $ref: '#/components/schemas/Money' }
+        shipping_total: { $ref: '#/components/schemas/Money' }
+        discount_total: { $ref: '#/components/schemas/Money' }
+        generated_at: { type: string, format: date-time }
+    AdminUser:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        display_name: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        status: { type: string, enum: [ACTIVE, LOCKED] }
+        temporarily_locked: { type: boolean }
+        created_at: { type: string, format: date-time }
+    RoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role: { $ref: '#/components/schemas/Role' }
+    Job:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        schedule: { type: string, example: Every hour at minute 0 (Asia/Bangkok) }
+        last_run: { allOf: [ { $ref: '#/components/schemas/JobRun' } ], nullable: true }
+        next_run_at: { type: string, format: date-time }
+    JobRun:
+      type: object
+      properties:
+        id: { type: integer }
+        job: { type: string }
+        trigger: { type: string, enum: [SCHEDULED, MANUAL] }
+        triggered_by: { type: string }
+        status: { type: string, enum: [RUNNING, SUCCESS, FAILED] }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time, nullable: true }
+        summary: { type: object, nullable: true, additionalProperties: true }
+        error_message: { type: string, nullable: true }
+    RunJobRequest:
+      type: object
+      description: ใช้เฉพาะงาน hourly-sales-report ช่วงเวลาละเอียดระดับนาที (ไม่มีวินาที) ช่วงไม่เกิน 24 ชั่วโมง
+      properties:
+        from: { type: string, example: '2026-10-10T14:00+07:00' }
+        to: { type: string, example: '2026-10-10T15:00+07:00' }
