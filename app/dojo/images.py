@@ -15,6 +15,12 @@ from .errors import ApiError, field_error
 
 IMAGES_DIR = Path(DB_PATH).parent / "images"
 DEFAULT_IMAGE_PATH = Path(__file__).parent / "assets" / "default-product.jpg"
+# Simple initial images for the seeded products (ids 1-25, matching
+# docs/instructions/test-accounts-and-seed-data.md). Bundled in the app
+# image, not the data volume, so a reset restores them. Any product beyond
+# the seed set (created later through the UI) falls back to the generic
+# DEFAULT_IMAGE_PATH until someone uploads a real photo.
+SEED_IMAGES_DIR = Path(__file__).parent / "assets" / "products"
 
 MAX_BYTES = 2 * 1024 * 1024  # 2 MB
 _JPEG_SOI = b"\xff\xd8\xff"
@@ -34,8 +40,13 @@ def has_custom_image(product_id: int) -> bool:
 
 
 def resolve_image_path(product_id: int) -> Path:
-    p = image_file(product_id)
-    return p if p.is_file() else DEFAULT_IMAGE_PATH
+    custom = image_file(product_id)
+    if custom.is_file():
+        return custom
+    seeded = SEED_IMAGES_DIR / f"{product_id}.jpg"
+    if seeded.is_file():
+        return seeded
+    return DEFAULT_IMAGE_PATH
 
 
 def validate_and_save(product_id: int, data: bytes) -> None:
