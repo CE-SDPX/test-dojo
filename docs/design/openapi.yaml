@@ -250,6 +250,21 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ProductDetail' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /api/products/{id}/image:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags: [Catalog]
+      summary: Get product image (public; no sign-in required)
+      description: REQ-CAT-011
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            image/jpeg:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
   /api/products/{id}/reviews:
     parameters:
       - $ref: '#/components/parameters/IdPath'
@@ -782,6 +797,31 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/ActiveRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ManageProduct' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/manage/products/{id}/image:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      tags: [Manage products]
+      summary: Upload a product image (manager, admin)
+      description: REQ-CAT-011
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image: { type: string, format: binary }
       responses:
         '200':
           description: OK
@@ -1445,6 +1485,7 @@ components:
         stock_status: { $ref: '#/components/schemas/StockStatus' }
         average_rating: { type: string, nullable: true, example: '4.5' }
         review_count: { type: integer }
+        image_url: { type: string, example: '/api/products/1/image' }
     ProductDetail:
       allOf:
         - $ref: '#/components/schemas/ProductListItem'
@@ -1475,6 +1516,7 @@ components:
         name: { type: string }
         price: { $ref: '#/components/schemas/Money' }
         stock_status: { $ref: '#/components/schemas/StockStatus' }
+        image_url: { type: string, example: '/api/products/1/image' }
         added_at: { type: string, format: date-time }
     Pricing:
       type: object
@@ -1655,6 +1697,8 @@ components:
         stock: { type: integer }
         active: { type: boolean }
         created_at: { type: string, format: date-time }
+        image_url: { type: string, example: '/api/products/1/image' }
+        has_image: { type: boolean }
     ProductCreateRequest:
       type: object
       required: [sku, name, category, price]

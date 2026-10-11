@@ -51,7 +51,7 @@ def resolve_image_path(product_id: int) -> Path:
 
 def validate_and_save(product_id: int, data: bytes) -> None:
     """Accepts only JPEG content (checked by content, not by filename) of at
-    most 2 MB, and saves it as ``<product_id>.jpg`` — REQ-CAT-010."""
+    most 2 MB, and saves it as ``<product_id>.jpg`` — REQ-CAT-011."""
     if not data:
         raise ApiError("VALIDATION_ERROR", details=[field_error("image", "required")])
     if len(data) > MAX_BYTES:

@@ -27,6 +27,7 @@ def list_wishlist():
         {
             "product_id": r["product_id"], "sku": r["sku"], "name": r["name"],
             "price": to_money(r["price_satang"]), "stock_status": stock_status(r["stock"]),
+            "image_url": f"/api/products/{r['product_id']}/image",
             "added_at": tu.to_api(tu.from_db(r["added_at"])),
         }
         for r in rows

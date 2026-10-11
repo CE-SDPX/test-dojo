@@ -241,11 +241,13 @@
       var items = MENUS[state.user.role] || [];
       nav.innerHTML = items.map(function (it) {
         var current = location.pathname === it[0];
-        return '<a data-link href="' + it[0] + '"' + (current ? ' aria-current="page"' : "") + ">" + esc(it[1]) + "</a>";
+        var label = it[0] === "/cart" ? '<span id="navCartLabel">' + esc(it[1]) + '</span>' : esc(it[1]);
+        return '<a data-link href="' + it[0] + '"' + (current ? ' aria-current="page"' : "") + ">" + label + "</a>";
       }).join("");
       userBox.innerHTML = "Signed in as " + esc(state.user.display_name) + ' <a data-link href="#" id="signOutLink">Sign out</a>';
       document.getElementById("signOutLink").onclick = function (e) { e.preventDefault(); doLogout(); };
       showSearch = state.user.role === "customer";
+      if (state.user.role === "customer") updateCartNavLabel();
     }
     if (showSearch) {
       searchBox.innerHTML = '<form id="headerSearchForm"><label class="visually-hidden" for="headerSearchInput">Search products</label>' +
@@ -262,6 +264,15 @@
     document.getElementById("menuToggle").onclick = function () { nav.classList.toggle("open"); };
     api("GET", "/api/version").then(function (r) {
       document.getElementById("siteFooter").textContent = "DojoMart v" + r.body.version + " (" + r.body.source_hash.slice(0, 8) + ")";
+    }).catch(function () {});
+  }
+
+  function updateCartNavLabel() {
+    api("GET", "/api/cart").then(function (r) {
+      var label = document.getElementById("navCartLabel");
+      if (!label) return;
+      var n = r.body.items.length;
+      label.textContent = n > 0 ? "Cart (" + n + ")" : "Cart";
     }).catch(function () {});
   }
 
@@ -467,7 +478,7 @@
   function addToCart(productId, quantity) {
     if (!state.user) { requireSignIn("Sign in to add items to your cart."); return; }
     api("POST", "/api/cart/items", { body: { product_id: Number(productId), quantity: quantity } })
-      .then(function () { toast("Added to cart."); })
+      .then(function () { toast("Added to cart."); updateCartNavLabel(); })
       .catch(function (err) { toast(errMessage(err), "error"); });
   }
 
@@ -542,11 +553,12 @@
       var el = document.getElementById("wishList");
       if (r.body.items.length === 0) { el.innerHTML = '<p class="empty-state">Your wishlist is empty.</p>'; return; }
       el.innerHTML = r.body.items.map(function (it) {
-        return '<div class="card" style="margin-bottom:8px">' +
-          '<a data-link href="/products/' + it.product_id + '">' + esc(it.name) + "</a> &mdash; " +
+        return '<div class="card" style="margin-bottom:8px;display:flex;gap:12px;align-items:center">' +
+          '<a data-link href="/products/' + it.product_id + '"><img src="' + imgUrl(it.image_url) + '" alt="Photo of ' + esc(it.name) + '" style="width:64px;height:64px;object-fit:cover;border-radius:4px;flex-shrink:0"></a>' +
+          '<div><a data-link href="/products/' + it.product_id + '">' + esc(it.name) + "</a> &mdash; " +
           '<span class="money">' + money(it.price) + "</span> " + stockBadge(it.stock_status) +
           ' <button data-add="' + it.product_id + '"' + (it.stock_status === "OUT_OF_STOCK" ? " disabled" : "") + ">Add to cart</button>" +
-          ' <button class="secondary" data-remove="' + it.product_id + '">Remove</button></div>';
+          ' <button class="secondary" data-remove="' + it.product_id + '">Remove</button></div></div>';
       }).join("");
       el.querySelectorAll("[data-add]").forEach(function (b) { b.onclick = function () { addToCart(b.getAttribute("data-add"), 1); }; });
       el.querySelectorAll("[data-remove]").forEach(function (b) {
@@ -600,7 +612,7 @@
         };
       });
       el.querySelectorAll("[data-remove]").forEach(function (b) {
-        b.onclick = function () { api("DELETE", "/api/cart/items/" + b.getAttribute("data-remove")).then(loadCart); };
+        b.onclick = function () { api("DELETE", "/api/cart/items/" + b.getAttribute("data-remove")).then(function () { updateCartNavLabel(); loadCart(); }); };
       });
       document.getElementById("couponForm").onsubmit = function (e) {
         e.preventDefault();

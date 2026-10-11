@@ -26,6 +26,7 @@
 | `GET /api/products` | รายการสินค้า (REQ-CAT-001) |
 | `GET /api/products/{id}` | รายละเอียดสินค้า (REQ-CAT-006) — `in_wishlist` เป็น `false` เสมอเมื่อไม่ได้เข้าสู่ระบบ |
 | `GET /api/products/{id}/reviews` | รายการรีวิว (REQ-REV-004) |
+| `GET /api/products/{id}/image` | รูปสินค้า (REQ-CAT-011) — สินค้าที่ไม่ `active` เข้าดูได้เฉพาะ `manager`/`admin` |
 
 สามจุดสุดท้ายยังใช้ได้ตามปกติเมื่อมีโทเคนที่ถูกต้องของบทบาทใดก็ได้ (ไม่จำกัดเฉพาะ `customer`) และ `GET /api/products/{id}` จะเติม `in_wishlist` ตามจริงเมื่อผู้เรียกเป็น `customer` ที่เข้าสู่ระบบ
 
@@ -90,6 +91,7 @@
 | `POST /api/manage/products` | ✖ | ✖ | ✔ | ✔ |
 | `PUT /api/manage/products/{id}` | ✖ | ✖ | ✔ | ✔ |
 | `PATCH /api/manage/products/{id}/active` | ✖ | ✖ | ✔ | ✔ |
+| `POST /api/manage/products/{id}/image` | ✖ | ✖ | ✔ | ✔ |
 | `GET /api/manage/coupons` | ✖ | ✖ | ✔ | ✔ |
 | `POST /api/manage/coupons` | ✖ | ✖ | ✔ | ✔ |
 | `PUT /api/manage/coupons/{id}` | ✖ | ✖ | ✔ | ✔ |

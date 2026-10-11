@@ -121,6 +121,9 @@
 | `role` | ไม่อยู่ในรายการ | `Role must be one of: customer, staff, manager, admin.` |
 | `method` | ไม่ใช่ `CARD` หรือ `PROMPTPAY` | `Payment method must be CARD or PROMPTPAY.` |
 | `active` | ไม่ใช่ค่า true/false | `Active must be true or false.` |
+| `image` | ไม่มีไฟล์แนบ | `This field is required.` |
+| `image` | ไฟล์ใหญ่เกิน 2 MB | `Image must be at most 2 MB.` |
+| `image` | เนื้อไฟล์ไม่ใช่ JPEG | `Image must be a JPEG file (.jpg).` |
 | (ฟิลด์อื่น) | ไม่ถูกต้องทั่วไป | `This field is invalid.` |
 
 ## 5. โครงสร้างข้อมูลหลัก
@@ -129,14 +132,15 @@
 |---|---|
 | **User (`/api/me`)** | `id`, `username`, `display_name`, `role`, `phone`, `birthdate`, `must_change_password`, `created_at` |
 | **Address** | `id`, `label`, `recipient_name`, `phone`, `line1`, `line2`, `province`, `postal_code`, `is_default`, `created_at` |
-| **Product (รายการ)** | `id`, `sku`, `name`, `category`, `price`, `stock_status`, `average_rating`, `review_count` |
+| **Product (รายการ)** | `id`, `sku`, `name`, `category`, `price`, `stock_status`, `average_rating`, `review_count`, `image_url` |
 | **Product (รายละเอียด)** | ฟิลด์ของรายการ และ `description`, `stock`, `in_wishlist` |
 | **Review** | `id`, `rating`, `comment`, `display_name`, `created_at` |
+| **Wishlist item** | `product_id`, `sku`, `name`, `price`, `stock_status`, `image_url`, `added_at` |
 | **Cart** | `items[]` (`id`, `product_id`, `sku`, `name`, `unit_price`, `quantity`, `line_total`, `stock_status`), `coupon`, `pricing` (`subtotal`, `volume_discount`, `coupon_discount`, `goods_total`, `vat`, `shipping`, `grand_total`) |
 | **Order** | ดูตัวอย่างใน `PRD-ORDER` |
 | **Order (รายการ)** | `id`, `status`, `grand_total`, `item_count`, `created_at` และสำหรับ `/api/manage/orders` เพิ่ม `customer` (`id`, `username`, `display_name`) |
 | **Coupon (จัดการ)** | `id`, `code`, `type`, `percent_off`, `amount_off`, `max_discount`, `min_spend`, `starts_at`, `expires_at`, `per_user_limit`, `total_limit`, `active`, `status`, `usage_count`, `created_at` |
-| **Product (จัดการ)** | `id`, `sku`, `name`, `description`, `category`, `price`, `stock`, `active`, `created_at` |
+| **Product (จัดการ)** | `id`, `sku`, `name`, `description`, `category`, `price`, `stock`, `active`, `created_at`, `image_url`, `has_image` |
 | **Inventory item** | `product_id`, `sku`, `name`, `stock`, `active` |
 | **Movement** | `id`, `product_id`, `product_name`, `delta`, `stock_after`, `reason`, `actor`, `created_at` |
 | **User (ผู้ดูแล)** | `id`, `username`, `display_name`, `role`, `status`, `temporarily_locked`, `created_at` |
@@ -169,6 +173,7 @@
 |---|---|---|---|---|
 | GET | `/api/products` | ไม่ต้องยืนยันตัวตน | 200 | 400 (พารามิเตอร์ `q`, `category`, `min_price`, `max_price`, `sort`, `page`, `page_size`) |
 | GET | `/api/products/{id}` | ไม่ต้องยืนยันตัวตน | 200 | 404 |
+| GET | `/api/products/{id}/image` | ไม่ต้องยืนยันตัวตน | 200 (JPEG) | 404 |
 | GET | `/api/products/{id}/reviews` | ไม่ต้องยืนยันตัวตน | 200 | 400, 404 |
 | POST | `/api/products/{id}/reviews` | customer | 201 | 400, 403 `REVIEW_NOT_ALLOWED`, 404, 409 `REVIEW_EXISTS` |
 | GET | `/api/wishlist` | customer | 200 | |
@@ -216,6 +221,7 @@
 | POST | `/api/manage/products` | manager, admin | 201 | 400, 409 `SKU_TAKEN` |
 | PUT | `/api/manage/products/{id}` | manager, admin | 200 | 400, 404 |
 | PATCH | `/api/manage/products/{id}/active` | manager, admin | 200 | 400, 404 |
+| POST | `/api/manage/products/{id}/image` | manager, admin | 200 | 400, 404 |
 | GET | `/api/manage/coupons` | manager, admin | 200 | 400 |
 | POST | `/api/manage/coupons` | manager, admin | 201 | 400, 409 `COUPON_CODE_TAKEN` |
 | PUT | `/api/manage/coupons/{id}` | manager, admin | 200 | 400, 404 |
