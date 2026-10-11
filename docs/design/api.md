@@ -167,9 +167,9 @@
 
 | Method | Path | บทบาท | สำเร็จ | ข้อผิดพลาดเฉพาะ |
 |---|---|---|---|---|
-| GET | `/api/products` | customer | 200 | 400 (พารามิเตอร์ `q`, `category`, `min_price`, `max_price`, `sort`, `page`, `page_size`) |
-| GET | `/api/products/{id}` | customer | 200 | 404 |
-| GET | `/api/products/{id}/reviews` | customer | 200 | 400, 404 |
+| GET | `/api/products` | ไม่ต้องยืนยันตัวตน | 200 | 400 (พารามิเตอร์ `q`, `category`, `min_price`, `max_price`, `sort`, `page`, `page_size`) |
+| GET | `/api/products/{id}` | ไม่ต้องยืนยันตัวตน | 200 | 404 |
+| GET | `/api/products/{id}/reviews` | ไม่ต้องยืนยันตัวตน | 200 | 400, 404 |
 | POST | `/api/products/{id}/reviews` | customer | 201 | 400, 403 `REVIEW_NOT_ALLOWED`, 404, 409 `REVIEW_EXISTS` |
 | GET | `/api/wishlist` | customer | 200 | |
 | PUT | `/api/wishlist/{product_id}` | customer | 201 | 404, 409 `ALREADY_IN_WISHLIST`, 409 `WISHLIST_LIMIT` |

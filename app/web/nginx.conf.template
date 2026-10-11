@@ -1,0 +1,24 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location /config.js {
+        default_type application/javascript;
+        add_header Cache-Control "no-store";
+    }
+
+    # index.html (served directly or via the SPA fallback below) must
+    # always be revalidated: a stale copy keeps referencing old asset
+    # paths/behaviour after an update, and is the document every deep
+    # link and page reload depends on.
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache" always;
+    }
+}

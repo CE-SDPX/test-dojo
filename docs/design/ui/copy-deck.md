@@ -49,6 +49,7 @@
 
 | องค์ประกอบ | ข้อความ |
 |---|---|
+| เมนูของผู้เยี่ยมชม (ยังไม่เข้าสู่ระบบ) | `Products` ส่วนช่องผู้ใช้แสดง `Sign in` และ `Create an account` แทนชื่อผู้ใช้และ `Sign out` |
 | เมนูของ `customer` | `Products`, `Wishlist`, `Cart`, `My orders`, `Profile`, `Sign out` |
 | เมนูของ `staff` | `Orders`, `Inventory`, `Low stock`, `Profile`, `Sign out` |
 | เมนูของ `manager` | `Reports`, `Products`, `Coupons`, `Profile`, `Sign out` |

@@ -16,13 +16,18 @@
 
 ## 2. สิทธิ์ของ endpoint
 
-### 2.1 ไม่ต้องยืนยันตัวตน
+### 2.1 ไม่ต้องยืนยันตัวตน (ผู้เยี่ยมชมเรียกได้ด้วย)
 
 | Endpoint | หมายเหตุ |
 |---|---|
 | `POST /api/auth/register` | สมัครสมาชิก |
 | `POST /api/auth/login` | เข้าสู่ระบบ |
 | `GET /api/health`, `GET /api/version`, `POST /api/reset` | จุดเชื่อมต่อสำหรับการฝึก |
+| `GET /api/products` | รายการสินค้า (REQ-CAT-001) |
+| `GET /api/products/{id}` | รายละเอียดสินค้า (REQ-CAT-006) — `in_wishlist` เป็น `false` เสมอเมื่อไม่ได้เข้าสู่ระบบ |
+| `GET /api/products/{id}/reviews` | รายการรีวิว (REQ-REV-004) |
+
+สามจุดสุดท้ายยังใช้ได้ตามปกติเมื่อมีโทเคนที่ถูกต้องของบทบาทใดก็ได้ (ไม่จำกัดเฉพาะ `customer`) และ `GET /api/products/{id}` จะเติม `in_wishlist` ตามจริงเมื่อผู้เรียกเป็น `customer` ที่เข้าสู่ระบบ
 
 ### 2.2 ผู้ใช้ทุกบทบาทที่ยืนยันตัวตนแล้ว
 
@@ -42,9 +47,6 @@
 | `PUT /api/me/addresses/{id}` | ✔ (own) | ✖ | ✖ | ✖ |
 | `DELETE /api/me/addresses/{id}` | ✔ (own) | ✖ | ✖ | ✖ |
 | `POST /api/me/addresses/{id}/default` | ✔ (own) | ✖ | ✖ | ✖ |
-| `GET /api/products` | ✔ | ✖ | ✖ | ✖ |
-| `GET /api/products/{id}` | ✔ | ✖ | ✖ | ✖ |
-| `GET /api/products/{id}/reviews` | ✔ | ✖ | ✖ | ✖ |
 | `POST /api/products/{id}/reviews` | ✔ | ✖ | ✖ | ✖ |
 | `GET /api/wishlist` | ✔ | ✖ | ✖ | ✖ |
 | `PUT /api/wishlist/{product_id}` | ✔ | ✖ | ✖ | ✖ |
@@ -112,37 +114,39 @@
 
 ## 3. สิทธิ์ของหน้าจอ
 
-| หน้า | Route | C | S | M | A |
-|---|---|---|---|---|---|
-| Sign in | `/login` | ไม่ต้องยืนยันตัวตน | | | |
-| Register | `/register` | ไม่ต้องยืนยันตัวตน | | | |
-| Profile | `/profile` | ✔ | ✔ | ✔ | ✔ |
-| Change password | `/change-password` | ✔ | ✔ | ✔ | ✔ |
-| Products | `/products` | ✔ | ✖ | ✖ | ✖ |
-| Product detail | `/products/{id}` | ✔ | ✖ | ✖ | ✖ |
-| Wishlist | `/wishlist` | ✔ | ✖ | ✖ | ✖ |
-| Cart | `/cart` | ✔ | ✖ | ✖ | ✖ |
-| Checkout | `/checkout` | ✔ | ✖ | ✖ | ✖ |
-| Order confirmation | `/orders/{id}/confirmation` | ✔ (own) | ✖ | ✖ | ✖ |
-| My orders | `/orders` | ✔ | ✖ | ✖ | ✖ |
-| Order detail | `/orders/{id}` | ✔ (own) | ✖ | ✖ | ✖ |
-| Order queue | `/staff/orders` | ✖ | ✔ | ✖ | ✔ |
-| Inventory | `/staff/inventory` | ✖ | ✔ | ✖ | ✔ |
-| Low stock | `/staff/low-stock` | ✖ | ✔ | ✖ | ✔ |
-| Product management | `/manager/products` | ✖ | ✖ | ✔ | ✔ |
-| Coupon management | `/manager/coupons` | ✖ | ✖ | ✔ | ✔ |
-| Reports | `/manager/reports` | ✖ | ✖ | ✔ | ✔ |
-| User management | `/admin/users` | ✖ | ✖ | ✖ | ✔ |
-| Jobs | `/admin/jobs` | ✖ | ✖ | ✖ | ✔ |
+| หน้า | Route | ผู้เยี่ยมชม | C | S | M | A |
+|---|---|---|---|---|---|---|
+| Sign in | `/login` | ✔ | ไม่ต้องยืนยันตัวตน | | | |
+| Register | `/register` | ✔ | ไม่ต้องยืนยันตัวตน | | | |
+| Profile | `/profile` | ✖ | ✔ | ✔ | ✔ | ✔ |
+| Change password | `/change-password` | ✖ | ✔ | ✔ | ✔ | ✔ |
+| Products (หน้าแรกของผู้เยี่ยมชม) | `/products` | ✔ | ✔ | ✖ | ✖ | ✖ |
+| Product detail | `/products/{id}` | ✔ | ✔ | ✖ | ✖ | ✖ |
+| Wishlist | `/wishlist` | ✖ | ✔ | ✖ | ✖ | ✖ |
+| Cart | `/cart` | ✖ | ✔ | ✖ | ✖ | ✖ |
+| Checkout | `/checkout` | ✖ | ✔ | ✖ | ✖ | ✖ |
+| Order confirmation | `/orders/{id}/confirmation` | ✖ | ✔ (own) | ✖ | ✖ | ✖ |
+| My orders | `/orders` | ✖ | ✔ | ✖ | ✖ | ✖ |
+| Order detail | `/orders/{id}` | ✖ | ✔ (own) | ✖ | ✖ | ✖ |
+| Order queue | `/staff/orders` | ✖ | ✖ | ✔ | ✖ | ✔ |
+| Inventory | `/staff/inventory` | ✖ | ✖ | ✔ | ✖ | ✔ |
+| Low stock | `/staff/low-stock` | ✖ | ✖ | ✔ | ✖ | ✔ |
+| Product management | `/manager/products` | ✖ | ✖ | ✖ | ✔ | ✔ |
+| Coupon management | `/manager/coupons` | ✖ | ✖ | ✖ | ✔ | ✔ |
+| Reports | `/manager/reports` | ✖ | ✖ | ✖ | ✔ | ✔ |
+| User management | `/admin/users` | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Jobs | `/admin/jobs` | ✖ | ✖ | ✖ | ✖ | ✔ |
 
-- หน้าที่ ✖ ต้องแสดงหน้า 403 เมื่อเปิดโดยตรงผ่าน URL
-- ผู้ที่ยังไม่เข้าสู่ระบบถูกนำไปหน้า `/login`
+- หน้าที่ ✖ สำหรับบทบาทที่เข้าสู่ระบบแล้วต้องแสดงหน้า 403 เมื่อเปิดโดยตรงผ่าน URL
+- หน้าที่ ✖ สำหรับผู้เยี่ยมชม (ยังไม่เข้าสู่ระบบ) ต้องนำไปหน้า `/login` ยกเว้น Products และ Product detail ซึ่งเปิดได้โดยตรง
 - ผู้ดูแลระบบดูคำสั่งซื้อของลูกค้าผ่านหน้า Order queue (ไม่มีหน้า `/orders/{id}` สำหรับ admin)
+- หน้าแรก (`/`) นำผู้เยี่ยมชมและ `customer` ไปหน้า Products เสมอ ส่วน `staff`, `manager`, `admin` ไปหน้าแรกของบทบาทตนเอง (`REQ-AUTH-011`)
 
 ## 4. เมนูของแต่ละบทบาท
 
 | บทบาท | รายการเมนู (ตามลำดับ) |
 |---|---|
+| ผู้เยี่ยมชม | Products (พร้อมลิงก์ Sign in และ Create an account แทนเมนูผู้ใช้) |
 | `customer` | Products, Wishlist, Cart, My orders, Profile, Sign out |
 | `staff` | Orders, Inventory, Low stock, Profile, Sign out |
 | `manager` | Reports, Products, Coupons, Profile, Sign out |
