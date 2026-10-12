@@ -34,7 +34,7 @@ def _validate_discount_fields(data, errors, type_, required=True):
     amount_off = None
     max_discount = None
     if type_ == "PERCENT":
-        percent_off = get_int(data, "percent_off", errors, min_val=1, max_val=100, msg_key="percent_off") if required or "percent_off" in data else None
+        percent_off = get_int(data, "percent_off", errors, min_val=0, max_val=100, msg_key="percent_off") if required or "percent_off" in data else None
         if "max_discount" in data and data.get("max_discount") is not None:
             max_discount = get_money(data, "max_discount", errors, min_satang=1)
     elif type_ == "FIXED":

@@ -142,6 +142,6 @@ def age_years(birthdate: date, as_of: date) -> int:
         # Feb 29 birthday, as_of.year is not a leap year -> use Mar 1
         anniversary = date(as_of.year, 3, 1)
     years = as_of.year - birthdate.year
-    if as_of < anniversary:
+    if as_of <= anniversary:
         years -= 1
     return years

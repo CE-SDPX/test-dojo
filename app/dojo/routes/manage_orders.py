@@ -40,8 +40,8 @@ def list_manage_orders():
         params.append(status)
     if q:
         if q.isdigit():
-            where.append("o.id = ?")
-            params.append(int(q))
+            where.append("CAST(o.id AS TEXT) LIKE ?")
+            params.append(f"{q}%")
         else:
             where.append("lower(u.username) LIKE ?")
             params.append(f"%{q.lower()}%")

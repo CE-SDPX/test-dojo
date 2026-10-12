@@ -57,7 +57,7 @@ def check_validity(conn, coupon, user_id: int, goods_after_volume_satang: int):
         return False, "MIN_SPEND", msg
     if usage_count(conn, coupon["code"], user_id) >= coupon["per_user_limit"]:
         return False, "USER_LIMIT", REASON_MESSAGES["USER_LIMIT"]
-    if coupon["total_limit"] is not None and usage_count(conn, coupon["code"]) >= coupon["total_limit"]:
+    if coupon["total_limit"] is not None and usage_count(conn, coupon["code"]) > coupon["total_limit"]:
         return False, "TOTAL_LIMIT", REASON_MESSAGES["TOTAL_LIMIT"]
     return True, None, None
 

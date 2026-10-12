@@ -107,7 +107,7 @@ def login():
 
     if not check_password_hash(user["password_hash"], password):
         new_count = user["failed_login_count"] + 1
-        locked_until = tu.to_db(now + timedelta(minutes=3)) if new_count >= 5 else None
+        locked_until = tu.to_db(now + timedelta(minutes=3)) if new_count > 5 else None
         conn.execute(
             "UPDATE users SET failed_login_count=?, locked_until=? WHERE id=?",
             (new_count, locked_until, user["id"]),

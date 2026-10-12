@@ -77,13 +77,13 @@ def add_cart_item():
             "SELECT * FROM cart_items WHERE user_id=? AND product_id=?", (g.user["id"], product_id)
         ).fetchone()
         new_qty = quantity + (existing["quantity"] if existing else 0)
-        if new_qty > MAX_QTY_PER_LINE:
-            conn.execute("ROLLBACK")
-            raise ApiError("QUANTITY_LIMIT")
         if new_qty > product["stock"]:
             conn.execute("ROLLBACK")
             msg = "This product is out of stock." if product["stock"] == 0 else f"Only {product['stock']} left in stock."
             raise ApiError("INSUFFICIENT_STOCK", message=msg)
+        if new_qty > MAX_QTY_PER_LINE:
+            conn.execute("ROLLBACK")
+            raise ApiError("QUANTITY_LIMIT")
         if existing is None:
             line_count = conn.execute(
                 "SELECT COUNT(*) AS n FROM cart_items WHERE user_id=?", (g.user["id"],)

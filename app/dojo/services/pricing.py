@@ -29,7 +29,7 @@ def compute(conn, items, coupon_row, user_id):
             coupon_discount = coupon_service.compute_discount(coupon_row, after_volume)
 
     goods_total = after_volume - coupon_discount
-    vat = percent_of(goods_total, VAT_PERCENT)
+    vat = percent_of(after_volume, VAT_PERCENT)
     if not items:
         shipping = 0
     else:

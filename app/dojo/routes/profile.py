@@ -124,7 +124,7 @@ def delete_address(address_id):
         conn.execute("DELETE FROM addresses WHERE id=?", (address_id,))
         if was_default:
             nxt = conn.execute(
-                "SELECT id FROM addresses WHERE user_id=? ORDER BY created_at, id LIMIT 1",
+                "SELECT id FROM addresses WHERE user_id=? ORDER BY created_at DESC, id LIMIT 1",
                 (g.user["id"],),
             ).fetchone()
             if nxt is not None:
