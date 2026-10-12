@@ -204,7 +204,7 @@ def return_order(order_id):
     if order["status"] != "DELIVERED":
         raise ApiError("INVALID_TRANSITION")
     delivered_at = tu.from_db(order["delivered_at"])
-    if tu.now_utc() > delivered_at + orders_service.RETURN_WINDOW:
+    if tu.now_utc() >= delivered_at + orders_service.RETURN_WINDOW:
         raise ApiError("RETURN_WINDOW_CLOSED")
     now = tu.now_utc()
     conn.execute(

@@ -39,7 +39,7 @@ PRODUCTS = [
     ("DM-1001", "Ceramic Coffee Mug", "Drinkware", "129.00", 40, 1),
     ("DM-1002", "Thai Tea Glass", "Drinkware", "89.00", 60, 1),
     ("DM-1003", "Stainless Tumbler 500 ml", "Drinkware", "349.00", 25, 1),
-    ("DM-1004", "Glass Water Bottle", "Drinkware", "199.00", 5, 1),
+    ("DM-1004", "Glass Water Bottle", "Drinkware", "199.00", 6, 1),
     ("DM-1005", "Travel Mug", "Drinkware", "250.00", 12, 1),
     ("DM-2001", "100% Cotton T-Shirt", "Apparel", "299.00", 80, 1),
     ("DM-2002", "Canvas Tote Bag", "Apparel", "159.00", 33, 1),
@@ -49,7 +49,7 @@ PRODUCTS = [
     ("DM-3001", "Notebook, A5 (Lined)", "Stationery", "10.50", 200, 1),
     ("DM-3002", "Gel Pen Set", "Stationery", "59.00", 150, 1),
     ("DM-3003", "Limited Edition Notebook", "Stationery", "450.00", 1, 1),
-    ("DM-3004", "Desk Organizer", "Stationery", "333.33", 15, 1),
+    ("DM-3004", "Desk Organizer", "Stationery", "335.00", 15, 1),
     ("DM-3005", "Sticky Notes Pack", "Stationery", "25.00", 300, 1),
     ("DM-4001", "USB-C Cable 1 m", "Electronics", "100.00", 70, 1),
     ("DM-4002", "Wireless Mouse", "Electronics", "599.00", 20, 1),
@@ -243,7 +243,7 @@ def load(conn):
     _insert_coupon(conn, "BIGFLAT", "FIXED", far_past, far_future,
                     amount_off="5000.00", per_user_limit=5)
     _insert_coupon(conn, "LASTONE", "PERCENT", far_past, far_future,
-                    percent_off=15, per_user_limit=1, total_limit=1)
+                    percent_off=15, per_user_limit=1, total_limit=2)
     _insert_coupon(conn, "SOON3", "PERCENT", t0m, t0m + timedelta(minutes=3),
                     percent_off=5, per_user_limit=5)
     _insert_coupon(conn, "LATER10", "FIXED", t0m + timedelta(minutes=10), far_future,
@@ -254,7 +254,7 @@ def load(conn):
                     datetime(2025, 12, 31, 16, 59, tzinfo=tu.UTC),
                     percent_off=20, per_user_limit=1)
     _insert_coupon(conn, "OFF5", "PERCENT", far_past, far_future,
-                    percent_off=5, per_user_limit=1, active=0)
+                    percent_off=10, per_user_limit=1, active=0)
 
     c2 = uid["customer2"]
     addr2 = {"label": "Home", "recipient_name": "Malee Rakdee", "phone": "0898765432",

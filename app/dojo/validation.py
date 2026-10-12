@@ -175,7 +175,7 @@ def query_page(errors):
 def query_page_size(errors):
     raw = request.args.get("page_size")
     if raw is None:
-        return 10
+        return 20
     if not raw.isdigit() or not (1 <= int(raw) <= 50):
         errors.add("page_size", "page_size")
         return 10

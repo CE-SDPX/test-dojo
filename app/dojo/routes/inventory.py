@@ -57,7 +57,7 @@ def create_adjustment():
     data = parse_json_body()
     errors = Errors()
     product_id = get_int(data, "product_id", errors, min_val=1)
-    delta = get_int(data, "delta", errors, min_val=-100000, max_val=100000, msg_key="delta")
+    delta = get_int(data, "delta", errors, min_val=-100000, max_val=99999, msg_key="delta")
     reason = get_enum(data, "reason", errors, ADJUST_REASONS, msg_key="reason")
     if delta == 0:
         errors.add("delta", "delta")

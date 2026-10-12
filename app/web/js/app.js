@@ -661,7 +661,7 @@
   // ---------- Orders ----------
   var STATUS_LABELS = {
     PENDING_PAYMENT: "Pending payment", PAID: "Paid", PACKED: "Packed", SHIPPED: "Shipped",
-    DELIVERED: "Delivered", CANCELLED: "Cancelled", RETURNED: "Returned",
+    DELIVERED: "Delivered", CANCELLED: "Canceled", RETURNED: "Returned",
   };
   function statusBadge(s) {
     var cls = s === "CANCELLED" ? "badge-danger" : (s === "DELIVERED" || s === "PAID" ? "badge-ok" : "badge-warn");
@@ -726,7 +726,7 @@
           "<h2>Delivery address</h2><p>" + esc(o.address.label) + " — " + esc(o.address.recipient_name) + ", " + esc(o.address.phone) + "<br>" +
           esc(o.address.line1) + (o.address.line2 ? ", " + esc(o.address.line2) : "") + ", " + esc(o.address.province) + " " + esc(o.address.postal_code) + "</p>" +
           "<h2>Payment summary</h2>" + renderCartBox(o) +
-          (o.refund_amount !== "0.00" ? '<p>Refund amount: <span class="money">' + money(o.refund_amount) + "</span></p>" : "") +
+          (o.refund_amount !== "0.00" ? '<p>Refunded amount: <span class="money">' + money(o.refund_amount) + "</span></p>" : "") +
           (o.return_deadline ? "<p>Return by " + fmtDateTime(o.return_deadline) + "</p>" : "") +
           "<h2>Timeline</h2><ul>" +
           ["created_at|Placed", "paid_at|Paid", "packed_at|Packed", "shipped_at|Shipped", "delivered_at|Delivered", "cancelled_at|Cancelled", "returned_at|Returned"]
@@ -942,7 +942,7 @@
     mount('<h1>Stock history</h1><div id="histBody">Loading&hellip;</div>');
     api("GET", "/api/manage/inventory/movements", { qs: { product_id: params.id } }).then(function (r) {
       var el = document.getElementById("histBody");
-      var labels = { RECEIVE: "Received", DAMAGE: "Damaged", CORRECTION: "Correction", ORDER: "Order", CANCEL: "Cancelled order", RETURN: "Returned order" };
+      var labels = { RECEIVE: "Received", DAMAGE: "Damaged", CORRECTION: "Correction", ORDER: "Order", CANCEL: "Order cancelled", RETURN: "Returned order" };
       if (r.body.items.length === 0) { el.innerHTML = '<p class="empty-state">No history found.</p>'; return; }
       el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Change</th><th class="num">Stock after</th><th>Reason</th><th>By</th></tr></thead><tbody>' +
         r.body.items.map(function (m) {
@@ -1258,7 +1258,7 @@
           b.onclick = function () {
             confirmDialog("Lock account", "Lock this account? The user will be signed out immediately.", "Lock").then(function (ok) {
               if (!ok) return;
-              api("POST", "/api/admin/users/" + b.getAttribute("data-lock") + "/lock").then(function () { toast("Account locked."); load(); }).catch(function (err) { toast(errMessage(err), "error"); });
+              api("POST", "/api/admin/users/" + b.getAttribute("data-lock") + "/lock").then(function () { toast("User locked."); load(); }).catch(function (err) { toast(errMessage(err), "error"); });
             });
           };
         });
