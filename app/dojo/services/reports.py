@@ -15,7 +15,7 @@ def aggregate_range(conn, start_dt, end_dt) -> dict:
         "SELECT COUNT(*) AS n, COALESCE(SUM(grand_total_satang),0) AS gross, "
         "COALESCE(SUM(vat_satang),0) AS vat, COALESCE(SUM(shipping_satang),0) AS ship, "
         "COALESCE(SUM(volume_discount_satang+coupon_discount_satang),0) AS disc "
-        "FROM orders WHERE status IN ('PAID','PACKED','SHIPPED','DELIVERED') "
+        "FROM orders WHERE status IN ('PAID','PACKED','SHIPPED') "
         "AND paid_at >= ? AND paid_at < ?",
         (tu.to_db(start_dt), tu.to_db(end_dt)),
     ).fetchone()

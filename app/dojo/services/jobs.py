@@ -49,7 +49,7 @@ def _finish_run(conn, run_id, status, summary=None, error=None):
 def _cancel_unpaid_orders(conn):
     cutoff = tu.now_utc() - timedelta(minutes=60)
     rows = conn.execute(
-        "SELECT id FROM orders WHERE status='PENDING_PAYMENT' AND created_at <= ? ORDER BY id",
+        "SELECT id FROM orders WHERE status='PENDING_PAYMENT' AND created_at < ? ORDER BY id",
         (tu.to_db(cutoff),),
     ).fetchall()
     ids = []

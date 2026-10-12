@@ -167,6 +167,5 @@ def set_product_active(product_id):
     conn.execute("UPDATE products SET active=? WHERE id=?", (1 if active else 0, product_id))
     if not active:
         conn.execute("DELETE FROM cart_items WHERE product_id=?", (product_id,))
-        conn.execute("DELETE FROM wishlist_items WHERE product_id=?", (product_id,))
     row = conn.execute("SELECT * FROM products WHERE id=?", (product_id,)).fetchone()
     return jsonify(_serialize(row))
