@@ -37,13 +37,13 @@ DISPLAY_NAMES = {
 PRODUCTS = [
     # sku, name, category, price, stock, active
     ("DM-1001", "Ceramic Coffee Mug", "Drinkware", "129.00", 40, 1),
-    ("DM-1002", "Thai Tea Glass", "Drinkware", "89.00", 60, 1),
+    ("DM-1002", "Thai Tea Glass", "Drinkware", "95.00", 60, 1),
     ("DM-1003", "Stainless Tumbler 500 ml", "Drinkware", "349.00", 25, 1),
     ("DM-1004", "Glass Water Bottle", "Drinkware", "199.00", 6, 1),
     ("DM-1005", "Travel Mug", "Drinkware", "250.00", 12, 1),
-    ("DM-2001", "100% Cotton T-Shirt", "Apparel", "299.00", 80, 1),
+    ("DM-2001", "100% Cotton T-Shirt", "Apparel", "290.00", 80, 1),
     ("DM-2002", "Canvas Tote Bag", "Apparel", "159.00", 33, 1),
-    ("DM-2003", "Wool Beanie", "Apparel", "189.00", 6, 1),
+    ("DM-2003", "Wool Beanie", "Apparel", "189.00", 7, 1),
     ("DM-2004", "Running Socks (3 pairs)", "Apparel", "71.50", 100, 1),
     ("DM-2005", "Rain Jacket", "Apparel", "1590.00", 8, 1),
     ("DM-3001", "Notebook, A5 (Lined)", "Stationery", "10.50", 200, 1),
@@ -55,11 +55,11 @@ PRODUCTS = [
     ("DM-4002", "Wireless Mouse", "Electronics", "599.00", 20, 1),
     ("DM-4003", "Bluetooth Speaker", "Electronics", "999.99", 10, 1),
     ("DM-4004", "Mechanical Keyboard", "Electronics", "1000.00", 9, 1),
-    ("DM-4005", "Phone Stand", "Electronics", "200.00", 45, 1),
+    ("DM-4005", "Phone Stand", "Electronics", "210.00", 45, 1),
     ("DM-5001", "Scented Candle", "Home", "149.00", 50, 1),
     ("DM-5002", "Throw Pillow", "Home", "399.00", 18, 1),
     ("DM-5003", "Vintage Poster", "Home", "350.00", 0, 1),
-    ("DM-9001", "Discontinued Desk Lamp", "Home", "690.00", 4, 0),
+    ("DM-9001", "Discontinued Desk Lamp", "Home", "690.00", 5, 0),
     ("DM-9002", "Retired Wall Clock", "Home", "520.00", 0, 0),
 ]
 
@@ -223,7 +223,7 @@ def load(conn):
     _insert_address(conn, uid["customer3"], "Office", "Preecha Boonmee", "0855555555",
                      "15 Patong Beach Rd", None, "Phuket", "83000", 0, now)
     _insert_address(conn, uid["customer3"], "Parents", "Preecha Boonmee", "0855555555",
-                     "22 Mittraphap Rd", None, "Khon Kaen", "40000", 0, now)
+                     "22 Mittraphap Rd", None, "Khon Kaen", "40001", 0, now)
     _insert_address(conn, uid["customer3"], "Condo", "Preecha Boonmee", "0855555555",
                      "8 Sukhumvit Pattaya Rd", None, "Chonburi", "20000", 0, now)
     _insert_address(conn, uid["customer3"], "Shop", "Preecha Boonmee", "0855555555",
@@ -237,21 +237,21 @@ def load(conn):
     far_past = _far_past_start()
     t0m = reset_at.replace(second=0, microsecond=0)
     _insert_coupon(conn, "SAVE10", "PERCENT", far_past, far_future,
-                    percent_off=10, max_discount="200.00", per_user_limit=1)
+                    percent_off=10, max_discount="150.00", per_user_limit=1)
     _insert_coupon(conn, "FLAT100", "FIXED", far_past, far_future,
-                    amount_off="100.00", min_spend="500.00", per_user_limit=5)
+                    amount_off="100.00", min_spend="400.00", per_user_limit=5)
     _insert_coupon(conn, "BIGFLAT", "FIXED", far_past, far_future,
-                    amount_off="5000.00", per_user_limit=5)
+                    amount_off="50.00", per_user_limit=5)
     _insert_coupon(conn, "LASTONE", "PERCENT", far_past, far_future,
                     percent_off=15, per_user_limit=1, total_limit=2)
-    _insert_coupon(conn, "SOON3", "PERCENT", t0m, t0m + timedelta(minutes=3),
+    _insert_coupon(conn, "SOON3", "PERCENT", t0m, t0m + timedelta(minutes=4),
                     percent_off=5, per_user_limit=5)
     _insert_coupon(conn, "LATER10", "FIXED", t0m + timedelta(minutes=10), far_future,
-                    amount_off="50.00", per_user_limit=5)
+                    amount_off="40.00", per_user_limit=5)
     from datetime import datetime
     _insert_coupon(conn, "OLD2025", "PERCENT",
                     datetime(2024, 12, 31, 17, 0, tzinfo=tu.UTC),
-                    datetime(2025, 12, 31, 16, 59, tzinfo=tu.UTC),
+                    datetime(2025, 12, 31, 17, 59, tzinfo=tu.UTC),
                     percent_off=20, per_user_limit=1)
     _insert_coupon(conn, "OFF5", "PERCENT", far_past, far_future,
                     percent_off=10, per_user_limit=1, active=0)
@@ -304,7 +304,7 @@ def load(conn):
     items4 = [("DM-4002", "Wireless Mouse", "599.00", 1)]
     pricing4 = _price(items4)
     _insert_order(conn, c2, "PACKED", addr2, items4, pricing4, None, created, paid, packed)
-    _insert_movement(conn, pid["DM-4002"], -1, 20, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-4002"], -1, 21, "ORDER", "customer2", created)
 
     # Order 5: PAID, created T0-95min, paid T0-90min
     created = now - timedelta(minutes=95)
@@ -326,7 +326,7 @@ def load(conn):
     items7 = [("DM-3005", "Sticky Notes Pack", "25.00", 4)]
     pricing7 = _price(items7)
     _insert_order(conn, c2, "PENDING_PAYMENT", addr2, items7, pricing7, None, created)
-    _insert_movement(conn, pid["DM-3005"], -4, 300, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-3005"], -4, 299, "ORDER", "customer2", created)
 
     # Order 8: CANCELLED while PENDING_PAYMENT, cancelled T0-2d
     created = now - timedelta(days=2, hours=1)
@@ -346,7 +346,7 @@ def load(conn):
     # customer3 review (seeded directly, bypassing the purchase check)
     conn.execute(
         "INSERT INTO reviews (product_id, user_id, rating, comment, created_at) VALUES (?,?,?,?,?)",
-        (pid["DM-1001"], uid["customer3"], 5, "Perfect size for my morning coffee.",
+        (pid["DM-1001"], uid["customer3"], 4, "Perfect size for my morning coffee.",
          tu.to_db(now - timedelta(days=4))),
     )
 
@@ -354,7 +354,7 @@ def load(conn):
     c3 = uid["customer3"]
     conn.execute("INSERT INTO carts (user_id, coupon_code, updated_at) VALUES (?, NULL, ?)",
                  (c3, tu.to_db(now)))
-    for sku, qty, offset in [("DM-3003", 1, 3), ("DM-1001", 2, 2), ("DM-2003", 1, 1)]:
+    for sku, qty, offset in [("DM-3003", 1, 3), ("DM-1001", 3, 2), ("DM-2003", 1, 1)]:
         conn.execute(
             "INSERT INTO cart_items (user_id, product_id, quantity, created_at) VALUES (?,?,?,?)",
             (c3, pid[sku], qty, tu.to_db(now - timedelta(minutes=offset))),

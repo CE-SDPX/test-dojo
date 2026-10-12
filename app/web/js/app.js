@@ -33,7 +33,7 @@
     if (!iso) return "";
     var d = new Date(iso);
     function p(n) { return String(n).padStart(2, "0"); }
-    return p(d.getDate()) + "/" + p(d.getMonth() + 1) + "/" + d.getFullYear();
+    return p(d.getMonth() + 1) + "/" + p(d.getDate()) + "/" + d.getFullYear();
   }
   function getToken() { return localStorage.getItem(TOKEN_KEY); }
   function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
@@ -1214,7 +1214,7 @@
       }
       function renderCoupons(items) {
         if (items.length === 0) { body.innerHTML = '<p class="empty-state">No data for the selected period.</p>'; return; }
-        body.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Code</th><th class="num">Orders</th><th class="num">Discount total</th></tr></thead><tbody>' +
+        body.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Code</th><th class="num">Orders</th><th class="num">Total discount</th></tr></thead><tbody>' +
           items.map(function (it) { return "<tr><td>" + esc(it.code) + '</td><td class="num">' + it.order_count + '</td><td class="num money">' + money(it.discount_total) + "</td></tr>"; }).join("") +
           "</tbody></table></div>";
       }
