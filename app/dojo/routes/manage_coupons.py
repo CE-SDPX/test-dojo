@@ -167,7 +167,7 @@ def update_coupon(coupon_id):
     expires_at = tu.from_db(existing["expires_at"])
     if "expires_at" in data:
         expires_at = get_minute_datetime(data, "expires_at", errors)
-    if starts_at is not None and expires_at is not None and expires_at < starts_at:
+    if starts_at is not None and expires_at is not None and expires_at <= starts_at:
         errors.add("expires_at", "expires_before_starts")
     errors.raise_if_any()
 

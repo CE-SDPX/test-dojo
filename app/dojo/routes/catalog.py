@@ -91,7 +91,7 @@ def list_products():
         where.append("category = ?")
         params.append(category)
     if min_price is not None:
-        where.append("price_satang >= ?")
+        where.append("price_satang > ?")
         params.append(min_price)
     if max_price is not None:
         where.append("price_satang <= ?")
