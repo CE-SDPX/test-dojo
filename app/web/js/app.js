@@ -494,7 +494,7 @@
         '<p class="money">' + money(it.price) + "</p>" +
         "<p>" + stockBadge(it.stock_status) + "</p>" +
         '<label for="qty">Quantity</label><select id="qty">' +
-        Array.from({ length: 10 }, function (_, i) { return i + 1; }).map(function (n) { return '<option value="' + n + '">' + n + "</option>"; }).join("") +
+        Array.from({ length: 12 }, function (_, i) { return i + 1; }).map(function (n) { return '<option value="' + n + '">' + n + "</option>"; }).join("") +
         "</select>" +
         '<div style="margin-top:8px"><button id="addBtn"' + (it.stock_status === "OUT_OF_STOCK" ? " disabled" : "") + ">Add to cart</button> " +
         '<button class="secondary" id="wishBtn">' + (it.in_wishlist ? "Remove from wishlist" : "Add to wishlist") + "</button></div>" +
@@ -1249,7 +1249,7 @@
         el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>' +
           r.body.items.map(function (u) {
             var statusLabel = u.status === "LOCKED" ? '<span class="badge badge-danger">Locked</span>' : (u.temporarily_locked ? '<span class="badge badge-warn">Temporarily locked</span>' : '<span class="badge badge-ok">Active</span>');
-            return "<tr><td>" + esc(u.username) + "</td><td>" + esc(u.display_name) + "</td><td>" + esc(u.role) + "</td><td>" + statusLabel + "</td><td>" + fmtDate(u.created_at) + "</td><td>" +
+            return "<tr><td>" + esc(u.username) + "</td><td>" + u.display_name + "</td><td>" + esc(u.role) + "</td><td>" + statusLabel + "</td><td>" + fmtDate(u.created_at) + "</td><td>" +
               (u.status === "LOCKED" || u.temporarily_locked ? '<button class="secondary" data-unlock="' + u.id + '">Unlock</button>' : '<button class="secondary" data-lock="' + u.id + '">Lock</button>') + " " +
               '<button class="secondary" data-reset="' + u.id + '" data-username="' + esc(u.username) + '">Reset password</button> ' +
               '<button class="secondary" data-role="' + u.id + '" data-current-role="' + u.role + '">Change role</button></td></tr>';

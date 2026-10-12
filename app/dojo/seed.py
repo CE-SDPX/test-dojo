@@ -36,31 +36,31 @@ DISPLAY_NAMES = {
 
 PRODUCTS = [
     # sku, name, category, price, stock, active
-    ("DM-1001", "Ceramic Coffee Mug", "Drinkware", "129.00", 40, 1),
+    ("DM-1001", "Ceramic Coffee Mug", "Drinkware", "135.00", 40, 1),
     ("DM-1002", "Thai Tea Glass", "Drinkware", "95.00", 60, 1),
-    ("DM-1003", "Stainless Tumbler 500 ml", "Drinkware", "349.00", 25, 1),
+    ("DM-1003", "Stainless Tumbler 500 ml", "Drinkware", "359.00", 25, 1),
     ("DM-1004", "Glass Water Bottle", "Drinkware", "199.00", 6, 1),
     ("DM-1005", "Travel Mug", "Drinkware", "250.00", 12, 1),
     ("DM-2001", "100% Cotton T-Shirt", "Apparel", "290.00", 80, 1),
-    ("DM-2002", "Canvas Tote Bag", "Apparel", "159.00", 33, 1),
+    ("DM-2002", "Canvas Tote Bag", "Apparel", "165.00", 33, 1),
     ("DM-2003", "Wool Beanie", "Apparel", "189.00", 7, 1),
-    ("DM-2004", "Running Socks (3 pairs)", "Apparel", "71.50", 100, 1),
-    ("DM-2005", "Rain Jacket", "Apparel", "1590.00", 8, 1),
-    ("DM-3001", "Notebook, A5 (Lined)", "Stationery", "10.50", 200, 1),
-    ("DM-3002", "Gel Pen Set", "Stationery", "59.00", 150, 1),
+    ("DM-2004", "Running Socks (3 pairs)", "Apparel", "72.50", 100, 1),
+    ("DM-2005", "Rain Jacket", "Apparel", "1595.00", 8, 1),
+    ("DM-3001", "Notebook, A5 (Lined)", "Stationery", "12.50", 200, 1),
+    ("DM-3002", "Gel Pen Set", "Stationery", "60.00", 150, 1),
     ("DM-3003", "Limited Edition Notebook", "Stationery", "450.00", 1, 1),
     ("DM-3004", "Desk Organizer", "Stationery", "335.00", 15, 1),
     ("DM-3005", "Sticky Notes Pack", "Stationery", "25.00", 300, 1),
-    ("DM-4001", "USB-C Cable 1 m", "Electronics", "100.00", 70, 1),
+    ("DM-4001", "USB-C Cable 1 m", "Electronics", "105.00", 70, 1),
     ("DM-4002", "Wireless Mouse", "Electronics", "599.00", 20, 1),
-    ("DM-4003", "Bluetooth Speaker", "Electronics", "999.99", 10, 1),
-    ("DM-4004", "Mechanical Keyboard", "Electronics", "1000.00", 9, 1),
+    ("DM-4003", "Bluetooth Speaker", "Electronics", "1099.99", 10, 1),
+    ("DM-4004", "Mechanical Keyboard", "Electronics", "1010.00", 9, 1),
     ("DM-4005", "Phone Stand", "Electronics", "210.00", 45, 1),
-    ("DM-5001", "Scented Candle", "Home", "149.00", 50, 1),
+    ("DM-5001", "Scented Candle", "Home", "155.00", 50, 1),
     ("DM-5002", "Throw Pillow", "Home", "399.00", 18, 1),
-    ("DM-5003", "Vintage Poster", "Home", "350.00", 0, 1),
+    ("DM-5003", "Vintage Poster", "Home", "360.00", 0, 1),
     ("DM-9001", "Discontinued Desk Lamp", "Home", "690.00", 5, 0),
-    ("DM-9002", "Retired Wall Clock", "Home", "520.00", 0, 0),
+    ("DM-9002", "Retired Wall Clock", "Home", "525.00", 0, 0),
 ]
 
 
@@ -211,23 +211,23 @@ def load(conn):
 
     now = reset_at
     _insert_address(conn, uid["customer1"], "Home", "Somchai Jaidee", "0812345678",
-                     "55/1 Phahonyothin Rd", None, "Bangkok", "10400", 1, now)
+                     "55/1 Phahonyothin Rd", None, "Bangkok", "10410", 1, now)
 
     c2_home = _insert_address(conn, uid["customer2"], "Home", "Malee Rakdee", "0898765432",
                                "99/9 Sukhumvit Rd", None, "Bangkok", "10110", 1, now)
     _insert_address(conn, uid["customer2"], "Office", "Malee Rakdee", "0898765432",
-                    "12 Silom Rd", None, "Bangkok", "10500", 0, now)
+                    "12 Silom Rd", None, "Bangkok", "10501", 0, now)
 
     _insert_address(conn, uid["customer3"], "Home", "Preecha Boonmee", "0855555555",
                      "99 Nimmanhaemin Rd", None, "Chiang Mai", "50000", 1, now)
     _insert_address(conn, uid["customer3"], "Office", "Preecha Boonmee", "0855555555",
-                     "15 Patong Beach Rd", None, "Phuket", "83000", 0, now)
+                     "15 Patong Beach Rd", None, "Phuket", "83001", 0, now)
     _insert_address(conn, uid["customer3"], "Parents", "Preecha Boonmee", "0855555555",
                      "22 Mittraphap Rd", None, "Khon Kaen", "40001", 0, now)
     _insert_address(conn, uid["customer3"], "Condo", "Preecha Boonmee", "0855555555",
                      "8 Sukhumvit Pattaya Rd", None, "Chonburi", "20000", 0, now)
     _insert_address(conn, uid["customer3"], "Shop", "Preecha Boonmee", "0855555555",
-                     "3 Niphat Uthit 1 Rd", None, "Songkhla", "90000", 0, now)
+                     "3 Niphat Uthit 1 Rd", None, "Songkhla", "90001", 0, now)
 
     pid = {}
     for sku, name, cat, price, stock, active in PRODUCTS:
@@ -271,7 +271,7 @@ def load(conn):
                 "goods_total": "1383.48", "vat": "96.84", "shipping": "0.00", "grand_total": "1480.32"}
     _insert_order(conn, c2, "DELIVERED", addr2, items1, pricing1, "SAVE10",
                   created, paid, packed, shipped, delivered)
-    _insert_movement(conn, pid["DM-2005"], -1, 8, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-2005"], -1, 7, "ORDER", "customer2", created)
     _insert_movement(conn, pid["DM-3002"], -2, 150, "ORDER", "customer2", created)
 
     # Order 2: DELIVERED, no coupon, delivered T0-6d (return window open)
@@ -284,8 +284,8 @@ def load(conn):
     pricing2 = _price(items2)
     _insert_order(conn, c2, "DELIVERED", addr2, items2, pricing2, None,
                   created, paid, packed, shipped, delivered)
-    _insert_movement(conn, pid["DM-1001"], -2, 40, "ORDER", "customer2", created)
-    _insert_movement(conn, pid["DM-2002"], -1, 33, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-1001"], -2, 39, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-2002"], -1, 32, "ORDER", "customer2", created)
 
     # Order 3: SHIPPED, shipped T0-1d
     created = now - timedelta(days=2)
@@ -295,7 +295,7 @@ def load(conn):
     items3 = [("DM-4001", "USB-C Cable 1 m", "100.00", 1)]
     pricing3 = _price(items3)
     _insert_order(conn, c2, "SHIPPED", addr2, items3, pricing3, None, created, paid, packed, shipped)
-    _insert_movement(conn, pid["DM-4001"], -1, 70, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-4001"], -1, 69, "ORDER", "customer2", created)
 
     # Order 4: PACKED, packed T0-3h
     created = now - timedelta(hours=4)
@@ -319,7 +319,7 @@ def load(conn):
     items6 = [("DM-5002", "Throw Pillow", "399.00", 1)]
     pricing6 = _price(items6)
     _insert_order(conn, c2, "PENDING_PAYMENT", addr2, items6, pricing6, None, created)
-    _insert_movement(conn, pid["DM-5002"], -1, 18, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-5002"], -1, 17, "ORDER", "customer2", created)
 
     # Order 7: PENDING_PAYMENT, created T0-59min
     created = now - timedelta(minutes=59)
@@ -335,13 +335,13 @@ def load(conn):
     pricing8 = _price(items8)
     _insert_order(conn, c2, "CANCELLED", addr2, items8, pricing8, None, created,
                   cancelled_at=cancelled, refund="0.00")
-    _insert_movement(conn, pid["DM-3002"], -2, 148, "ORDER", "customer2", created)
+    _insert_movement(conn, pid["DM-3002"], -2, 147, "ORDER", "customer2", created)
     _insert_movement(conn, pid["DM-3002"], 2, 150, "CANCEL", "customer2", cancelled)
 
     # customer2 review
     conn.execute(
         "INSERT INTO reviews (product_id, user_id, rating, comment, created_at) VALUES (?,?,?,?,?)",
-        (pid["DM-1001"], c2, 4, "Sturdy and keeps coffee warm.", tu.to_db(now - timedelta(days=5))),
+        (pid["DM-1001"], c2, 4, "Sturdy and keeps my coffee warm.", tu.to_db(now - timedelta(days=5))),
     )
     # customer3 review (seeded directly, bypassing the purchase check)
     conn.execute(

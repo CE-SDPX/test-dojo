@@ -156,7 +156,7 @@ def query_q(errors):
     if q is None:
         return None
     q = q.strip()
-    if len(q) > 100:
+    if len(q) >= 100:
         errors.add("q", "q")
         return None
     return q or None
